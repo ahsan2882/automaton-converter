@@ -60,8 +60,72 @@ class NFA:
 
         return DFA(
             states=list(dfa_states.values()),
+            states_map=dfa_states,
             alphabet=self.alphabet,
             transitions=dfa_transitions,
             start_state="Q0",
             accept_states=dfa_accept_states,
         )
+
+
+class εNFA(NFA):
+    def __init__(
+        self, states, alphabet, transitions, start_state, accept_states
+    ) -> None:
+        super().__init__(
+            states=states,
+            alphabet=alphabet,
+            transitions=transitions,
+            start_state=start_state,
+            accept_states=accept_states,
+        )
+        self.epsilon = "ε"
+
+    def epsilon_closure(self, states):
+        epsilon_closure_states = set(states)
+        stack = list(states)
+        while stack:
+            state = stack.pop()
+            for transition, next_states in self.transitions.items():
+                if state in transition and self.epsilon in transition:
+                    for next_state in next_states:
+                        if next_state not in epsilon_closure_states:
+                            epsilon_closure_states.add(next_state)
+                            stack.append(next_state)
+
+        # Add epsilon closure from the start state
+        if self.start_state in epsilon_closure_states:
+            for transition, next_states in self.transitions.items():
+                if self.start_state in transition and self.epsilon in transition:
+                    for next_state in next_states:
+                        if next_state not in epsilon_closure_states:
+                            epsilon_closure_states.add(next_state)
+                            stack.append(next_state)
+
+        return frozenset(epsilon_closure_states)
+
+    def convert_to_nfa(self) -> NFA:
+        transitions_without_epsilon = {}
+        for state in self.states:
+            for symbol in self.alphabet:
+                epsilon_closure = self.epsilon_closure(self.move({state}, symbol))
+                transitions_without_epsilon[frozenset({state, symbol})] = list(
+                    epsilon_closure
+                )
+        return NFA(
+            states=self.states,
+            alphabet=self.alphabet,
+            transitions=transitions_without_epsilon,
+            start_state=self.start_state,
+            accept_states=self.accept_states,
+        )
+
+    def convert_to_dfa(self) -> DFA:
+        transitions_without_epsilon = {}
+        for state in self.states:
+            for symbol in self.alphabet:
+                epsilon_closure = self.epsilon_closure(self.move({state}, symbol))
+                transitions_without_epsilon[frozenset({state, symbol})] = list(
+                    epsilon_closure
+                )
+        return super().convert_to_dfa()
