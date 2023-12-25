@@ -1,11 +1,8 @@
 from collections import deque
 from typing import Dict, FrozenSet, List, Set
 
-from dfa import DFA
-
 
 class NFA:
-    """create an NFA instance"""
 
     def __init__(
         self,
@@ -29,7 +26,8 @@ class NFA:
 
         return frozenset(move_states)
 
-    def convert_to_dfa(self) -> DFA:
+    def convert_to_dfa(self):
+        from dfa import DFA
         dfa_states: Dict[FrozenSet[str], str] = {}
         queue: deque[FrozenSet[str]] = deque()
 
