@@ -14,26 +14,17 @@ nfa = NFA(
         frozenset({"q3", "a"}): ["q3"],
         frozenset({"q3", "b"}): ["q3"],
     },
-    # transitions={
-    #     frozenset({"q0", "0"}): ["q0"],
-    #     frozenset({"q0", "1"}): ["q1"],
-    #     frozenset({"q1", "0"}): ["q2"],
-    #     frozenset({"q1", "1"}): ["q1"],
-    #     frozenset({"q2", "0"}): ["q2"],
-    #     frozenset({"q2", "1"}): ["q2"],
-    # },
     start_state="q0",
     accept_states=["q0"],
 )
-# print(nfa.transitions[frozenset({"q0", "b"})])
 
 dfa: DFA = nfa.convert_to_dfa()
 
 print("DFA States:", dfa.states)
 print("DFA Transitions:", dfa.transitions)
-# print("DFA Start State:", dfa.start_state)
+print("DFA Start State:", dfa.start_state)
 print("DFA Accept States:", dfa.accept_states)
-# print("DFA States Map:", dfa.states_map)
+print("DFA States Map:", dfa.states_map)
 
 regexp = dfa.convert_to_regular_expression()
 print(regexp)
