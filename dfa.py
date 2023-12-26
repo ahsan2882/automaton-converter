@@ -24,7 +24,7 @@ class DFA:
         terms = equations.split('+')
         for eq in terms:
             if state in eq:
-                P = eq.replace(f'({state})', '').replace('|', '+')
+                P = eq.replace(f'({state})', '')
             else:
                 if len(Q) == 0:
                     Q = eq
@@ -35,9 +35,9 @@ class DFA:
     def reduce_eq(self, terms: List[str]) -> str:
         groups: Dict[str, Union[str, List[str]]] = {}
         for term in terms:
-            match_state = re.match(r'\((Q.*?)\)', term)
+            match_state: List[str] = re.findall(r'\((Q\d+)\)', term)
             if match_state:
-                common_term = match_state.group(1)
+                common_term = match_state[0]
                 if common_term not in groups:
                     groups[common_term] = []
                 groups[common_term].append(
@@ -62,34 +62,24 @@ class DFA:
         for state in self.states:
             equations[state] = self.get_equation_for_state(state)
         # reducing all equations in the form Q = Q1a + Q1b + Q2a to Q1(a+b)+Q2a
+        print(equations)
         for s in equations:
             equations[s] = self.reduce_eq(equations[s])
-
-        # apply arden's theorem to get more reduced equations
-        for s in equations:
-            if s in equations[s]:
-                equations[s] = self.arden_theorem(s, equations[s])
-
-        reduced = []
-        iterations = 0
-
-        while len(reduced) != len(equations.keys()) and iterations < 10:
-            iterations += 1
-            print('reduced', reduced)
-            for state_eq, eq in equations.items():
-                if 'Q' not in eq and state_eq not in reduced:
-                    reduced.append(state_eq)
-                else:
-                    print(f'{state_eq}', eq)
-                    match_state: List[str] = re.findall(r'\((Q\d+)\)', eq)
-                    if match_state and len(match_state) == 1:
-                        equations[state_eq] = eq.replace(
-                            f'({match_state[0]})', equations[match_state[0]])
-                        reduced.append(state_eq)
-        regex_list = []
+        regexpList = []
         for state in self.accept_states:
-            regex_list.append(equations[state])
-        return '|'.join(regex_list)
+            regexp = equations[state]
+            while 'Q' in regexp:
+                match_state: List[str] = re.findall(r'\((Q\d+)\)', regexp)
+                if match_state:
+                    for match in match_state:
+                        if match != state:
+                            regexp = regexp.replace(
+                                f'({match})', equations[match])
+                regexp = self.reduce_eq(regexp.split('+'))
+                regexp = self.arden_theorem(state, regexp)
+            equations[state] = regexp
+            regexpList.append(regexp)
+        return '|'.join(regexpList)
 
     def get_equation_for_state(self, state) -> List[str]:
         equations: List[str] = []

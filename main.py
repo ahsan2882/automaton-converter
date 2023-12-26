@@ -2,7 +2,7 @@ from dfa import DFA
 from nfa import NFA
 
 nfa = NFA(
-    states=["q0", "q1", "q2", "q3"],
+    states=["q0", "q1", "q2", 'q3'],
     alphabet=["a", "b"],
     transitions={
         frozenset({"q0", "a"}): ["q1"],
@@ -14,6 +14,14 @@ nfa = NFA(
         frozenset({"q3", "a"}): ["q3"],
         frozenset({"q3", "b"}): ["q3"],
     },
+    # transitions={
+    #     frozenset({"q0", "0"}): ["q0"],
+    #     frozenset({"q0", "1"}): ["q1"],
+    #     frozenset({"q1", "0"}): ["q2"],
+    #     frozenset({"q1", "1"}): ["q1"],
+    #     frozenset({"q2", "0"}): ["q2"],
+    #     frozenset({"q2", "1"}): ["q2"],
+    # },
     start_state="q0",
     accept_states=["q0"],
 )
