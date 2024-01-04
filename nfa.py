@@ -18,12 +18,11 @@ class NFA:
         self.start_state: str = start_state
         self.accept_states: List[str] = accept_states
 
-    def move(self, states: FrozenSet[str], symbol: str) -> FrozenSet:
+    def move(self, states: FrozenSet[str], symbol: str) -> FrozenSet[str]:
         move_states: Set[str] = set()
         for state in states:
             move_states.update(self.transitions.get(
                 frozenset({state, symbol}), []))
-
         return frozenset(move_states)
 
     def convert_to_dfa(self):

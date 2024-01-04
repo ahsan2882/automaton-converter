@@ -50,16 +50,8 @@ class DFA:
                 match_state = re.findall(r'\((Q\d+)\)', term)
                 if match_state:
                     state = match_state[0]
-                    if len(grouped_expression) == 0:
-                        grouped_expression = term.replace(f'({state})', '')
-                    else:
-                        closure = re.findall(r'\(.+&.+\)', grouped_expression)
-                        if closure and len(closure) > 0:
-                            grouped_expression += f"&&{term.replace(f'({state})', '')}"
-                        else:
-                            grouped_expression += f"&{term.replace(f'({state})', '')}"
-                    # grouped_expression = term.replace(f'({state})', '') if len(
-                    #     grouped_expression) == 0 else grouped_expression + f"&{term.replace(f'({state})', '')}"
+                    grouped_expression = term.replace(f'({state})', '') if len(
+                        grouped_expression) == 0 else grouped_expression + f"+{term.replace(f'({state})', '')}"
             else:
                 reduced_equations.append(term)
         if len(grouped_expression) > 0:
@@ -131,11 +123,11 @@ class DFA:
             substring = expression[start+1:end]
             char_test = expression[end+1:end+2]
             if '||' not in substring:
-                if '&' in substring:
+                if '+' in substring:
                     symb_index = f"S{len(symbol_expr)}"
+                    symbol_expr[symb_index] = f"({substring})"
                     expression = expression.replace(
                         f"({substring})", f"[{symb_index}]")
-                    symbol_expr[symb_index] = f"({substring})"
                 else:
                     if char_test != '*':
                         if self.__check_state_in_exp(substring):
@@ -146,11 +138,11 @@ class DFA:
                             expression = expression[:start] + \
                                 substring + expression[end + 1:]
                     else:
-                        if substring not in closures.values() and ('&' in substring or '*' in substring):
+                        if substring not in closures.values() and '+' in substring or '*' in substring:
                             index = f'C{len(closures)}'
+                            closures[index] = substring
                             expression = expression.replace(
                                 f"({substring})", f"[{index}]")
-                            closures[index] = substring
                         else:
                             expression = expression[:start] + \
                                 substring + expression[end + 1:]
@@ -194,27 +186,27 @@ class DFA:
             equations.append('ε')
         return '||'.join(equations)
 
-    def __simulate_transition(self, current_state: str, symbol: str) -> str:
-        transition_key = frozenset({current_state, symbol}) if frozenset(
-            {current_state, symbol}) in self.transitions else frozenset({symbol, current_state})
-        return self.transitions.get(transition_key)
+    # def __simulate_transition(self, current_state: str, symbol: str) -> str:
+    #     transition_key = frozenset({current_state, symbol}) if frozenset(
+    #         {current_state, symbol}) in self.transitions else frozenset({symbol, current_state})
+    #     return self.transitions.get(transition_key)
 
-    def check_string_input(self, string: str):
-        if len(string) > 0:
-            self.__check_string_symbol(string)
-            current_state = self.start_state
-            for idx, char in enumerate(string):
-                next_state = self.__simulate_transition(current_state, char)
+    # def check_string_input(self, string: str):
+    #     if len(string) > 0:
+    #         self.__check_string_symbol(string)
+    #         current_state = self.start_state
+    #         for idx, char in enumerate(string):
+    #             next_state = self.__simulate_transition(current_state, char)
 
-                print(
-                    f"current_state: {current_state}, symbol: {char}[pos]:{idx} next_state: {next_state}")
-                current_state = next_state
-            return current_state in self.accept_states
-        else:
-            return self.start_state in self.accept_states
+    #             print(
+    #                 f"current_state: {current_state}, symbol: {char}[pos]:{idx} next_state: {next_state}")
+    #             current_state = next_state
+    #         return current_state in self.accept_states
+    #     else:
+    #         return self.start_state in self.accept_states
 
-    def __check_string_symbol(self, string: str):
-        for char in string:
-            if char not in self.alphabet:
-                raise Exception(
-                    f"Invalid character {char} in string. {char} doesn't exist in input alphabets.")
+    # def __check_string_symbol(self, string: str):
+    #     for char in string:
+    #         if char not in self.alphabet:
+    #             raise Exception(
+    #                 f"Invalid character {char} in string. {char} doesn't exist in input alphabets.")
