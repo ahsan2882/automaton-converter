@@ -1,5 +1,14 @@
+from pprint import pprint
 import re
 import os
+from typing import Dict, List, Union
+
+
+class Node:
+    def __init__(self, operand):
+        self.operand: str = operand
+        self.left: Node = None
+        self.right: Node = None
 
 
 class RegExpression:
@@ -40,111 +49,84 @@ class RegExpression:
         self.RIGHT_PAREN = ')'
         self.KLEENE = '*'
 
-    # def __convert_to_tree(self, expression,sc,cc):
-    #     tree = {}
-    #     exp = expression.split('+')
-    #     tree['choices'] = [ex for ex in exp]
-    #     for choice in tree['choices']:
+    def convert_to_tree(self, exp: str):
+        def tree_to_json(node: Node):
+            if node is None:
+                return None
+            if node.operand.isalpha():
+                return {'value': node.operand}
+            left_tree = tree_to_json(node.left)
+            right_tree = tree_to_json(node.right)
+            nnode = {"value": node.operand, "left": left_tree}
+            if right_tree:
+                nnode["right"] = right_tree
+            return nnode
 
-    def simplify_regexp(self, expression: str) -> str:
-        simplified_closures = {}
-        contain_closure = {}
-        while '(' in expression:
-            start = expression.rfind('(')
-            end = expression.find(')', start)
-            substring = expression[start+1:end]
-            if ('*' in substring or '&' in substring):
-                if '[C' not in substring:
-                    sci = f'C{len(simplified_closures)}'
-                    simplified_closures[sci] = substring
-                    expression = expression.replace(
-                        f"({substring})", f"[{sci}]")
+        stack = []
+        root: Node = self.update_tree(stack, exp)
+        pprint(tree_to_json(root))
+
+    def update_tree(self, stack: Union[List[Node], str], exp: str) -> Node:
+        def reduce_group(group: List[Node], reverse: bool = False):
+            if reverse:
+                group.reverse()
+            while len(group) > 0:
+                if len(group) == 1:
+                    return group.pop()
+                last = group.pop()
+                if last.operand in ['.', '*'] or last.operand.isalpha():
+                    if group[-1].operand == '+':
+                        if group[-1].right is None:
+                            llast = group.pop()
+                            llast.right = last
+                            group.append(llast)
+                        else:
+                            node = Node('.')
+                            node.left = group.pop()
+                            node.right = last
+                            group.append(node)
+                    elif group[-1].operand.isalpha():
+                        node = Node('.')
+                        node.left = group.pop()
+                        node.right = last
+                        group.append(node)
+                elif last.operand == '+' and last.right is not None:
+                    node = Node('.')
+                    node.left = group.pop()
+                    node.right = last
+                    group.append(node)
+            return group.pop()
+        for char in exp:
+            if char == '(':
+                stack.append(char)
+            elif char == ')':
+                # pop all chars until stack has '('
+                group: List[Node] = []
+                while stack and stack[-1] != '(':
+                    group.append(stack.pop())
+                stack.pop()
+                stack.append(reduce_group(group, reverse=True))
+            elif char == '*':
+                # kleene is applied to single group only, group may contain single alphabetic characters or operations between them
+                left = stack.pop()
+                node = Node('*')
+                node.left = left if isinstance(left, Node) else Node(left)
+                stack.append(node)
+            elif char == '+':
+                group: List[Node] = []
+                while stack and stack[-1] != '(':
+                    group.append(stack.pop())
+                    if len(stack) == 0:
+                        break
+                if len(group) > 1:
+                    left_node = reduce_group(group, reverse=True)
                 else:
-                    cclo = f"S{len(contain_closure)}"
-                    contain_closure[cclo] = substring
-                    expression = expression.replace(
-                        f"({substring})", f"[{cclo}]")
-        tree = self.__convert_to_tree(
-            expression, simplified_closures, contain_closure)
-
-        # def check_rule_pattern(exp: str, rule):
-        #     result = self.rules[rule]
-        #     ex = exp.split('+')
-        #     pass
-
-        # def apply_rules(expr: str):
-        #     for rule in self.rules:
-        #         expr = check_rule_pattern(expr, rule)
-        #     return expr
-
-        # simplified = expression
-        # while True:
-        #     prev_simplified = simplified
-        #     simplified = apply_rules(simplified)
-        #     if simplified == prev_simplified:
-        #         break
-
-        # return simplified
-        # output = apply_rules(expression, self.rules)
-        # while output != expression:
-        #     expression = output
-        #     output = apply_rules(expression, self.rules)
-        # return output
-
-        # def recursive_simplify(expr):
-        #     return expr
-        # while True:
-        #     simplified = recursive_simplify(expression)
-        #     if simplified == expression:
-        #         break
-        #     expression = simplified
-        # return expression
-
-
-class Node:
-    def __init__(self, value):
-        self.value = value
-        self.left = None
-        self.right = None
-
-
-def create_tree(regex):
-    if len(regex) == 0:
-        return None
-
-    if regex[0] == '(':
-        count = 0
-        for i in range(len(regex)):
-            if regex[i] == '(':
-                count += 1
-            elif regex[i] == ')':
-                count -= 1
-            if count == 0:
-                if i == len(regex) - 1:
-                    return create_tree(regex[1:i])
-                else:
-                    break
-
-        operator_index = i + 1
-        if operator_index < len(regex):
-            operator = regex[operator_index]
-            node = Node(operator)
-            node.left = create_tree(regex[1:i])
-            node.right = create_tree(regex[i + 2:-1])
-            return node
-
-    node = Node(regex[0])
-    node.left = create_tree(regex[1:])
-    return node
-
-
-def print_tree(root, level=0):
-    if root:
-        print("  " * level + str(root.value))
-        print_tree(root.left, level + 1)
-        print_tree(root.right, level + 1)
-
-
-regex = "(((((b+b)+ab)+($+a((a+a)+b)))b)(b(bb)+a*))((b(b*(ca)))*+($+cb)b)"
-tree = create_tree(regex)
-print_tree(tree)
+                    left_node = group.pop()
+                node = Node('+')
+                node.left = left_node if isinstance(
+                    left_node, Node) else Node(left_node)
+                stack.append(node)
+            else:
+                node = Node(char)
+                stack.append(node)
+        return reduce_group(stack)
