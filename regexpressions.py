@@ -48,6 +48,8 @@ class RegExpression:
         self.LEFT_PAREN = '('
         self.RIGHT_PAREN = ')'
         self.KLEENE = '*'
+        self.CONCAT = '.'
+        self.UNION = '+'
 
     def convert_to_tree(self, exp: str):
         def tree_to_json(node: Node):
@@ -62,9 +64,9 @@ class RegExpression:
                 nnode["right"] = right_tree
             return nnode
 
-        stack = []
+        stack: Union[List[Node], str] = []
         root: Node = self.update_tree(stack, exp)
-        pprint(tree_to_json(root))
+        return tree_to_json(root)
 
     def update_tree(self, stack: Union[List[Node], str], exp: str) -> Node:
         def reduce_group(group: List[Node], reverse: bool = False):
@@ -97,36 +99,36 @@ class RegExpression:
                     group.append(node)
             return group.pop()
         for char in exp:
-            if char == '(':
-                stack.append(char)
-            elif char == ')':
-                # pop all chars until stack has '('
-                group: List[Node] = []
-                while stack and stack[-1] != '(':
-                    group.append(stack.pop())
-                stack.pop()
-                stack.append(reduce_group(group, reverse=True))
-            elif char == '*':
-                # kleene is applied to single group only, group may contain single alphabetic characters or operations between them
-                left = stack.pop()
-                node = Node('*')
-                node.left = left if isinstance(left, Node) else Node(left)
-                stack.append(node)
-            elif char == '+':
-                group: List[Node] = []
-                while stack and stack[-1] != '(':
-                    group.append(stack.pop())
-                    if len(stack) == 0:
-                        break
-                if len(group) > 1:
-                    left_node = reduce_group(group, reverse=True)
-                else:
-                    left_node = group.pop()
-                node = Node('+')
-                node.left = left_node if isinstance(
-                    left_node, Node) else Node(left_node)
-                stack.append(node)
-            else:
-                node = Node(char)
-                stack.append(node)
+            match char:
+                case self.RIGHT_PAREN:
+                    stack.append(char)
+                case self.LEFT_PAREN:
+                    # pop all chars until stack has '('
+                    group: List[Node] = []
+                    while stack and stack[-1] != '(':
+                        group.append(stack.pop())
+                    stack.pop()
+                    stack.append(reduce_group(group, reverse=True))
+                case self.KLEENE:
+                    # kleene is applied to single group only, group may contain single alphabetic characters or operations between them
+                    left = stack.pop()
+                    node = Node('*')
+                    node.left = left if isinstance(left, Node) else Node(left)
+                    stack.append(node)
+                case self.UNION:
+                    group: List[Node] = []
+                    while stack and stack[-1] != '(':
+                        group.append(stack.pop())
+                        if len(stack) == 0:
+                            break
+                    if len(group) > 1:
+                        left_node = reduce_group(group, reverse=True)
+                    else:
+                        left_node = group.pop()
+                    node = Node('+')
+                    node.left = left_node if isinstance(
+                        left_node, Node) else Node(left_node)
+                    stack.append(node)
+                case _:
+                    stack.append(Node(char))
         return reduce_group(stack)
