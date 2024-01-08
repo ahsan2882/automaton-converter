@@ -3,22 +3,22 @@ from nfa import NFA, eNFA
 from regexpressions import RegExpression
 regex = RegExpression()
 
-nfa = NFA(
-    states=["q0", "q1", "q2", "q3"],
-    alphabet=["a", "b"],
-    transitions={
-        frozenset({"q0", "a"}): ["q1"],
-        frozenset({"q0", "b"}): ["q2"],
-        frozenset({"q1", "a"}): ["q3"],
-        frozenset({"q1", "b"}): ["q0"],
-        frozenset({"q2", "a"}): ["q0"],
-        frozenset({"q2", "b"}): ["q3"],
-        frozenset({"q3", "a"}): ["q3"],
-        frozenset({"q3", "b"}): ["q3"],
-    },
-    start_state="q0",
-    accept_states=["q0"],
-)
+# nfa = NFA(
+#     states=["q0", "q1", "q2", "q3"],
+#     alphabet=["a", "b"],
+#     transitions={
+#         frozenset({"q0", "a"}): ["q1"],
+#         frozenset({"q0", "b"}): ["q2"],
+#         frozenset({"q1", "a"}): ["q3"],
+#         frozenset({"q1", "b"}): ["q0"],
+#         frozenset({"q2", "a"}): ["q0"],
+#         frozenset({"q2", "b"}): ["q3"],
+#         frozenset({"q3", "a"}): ["q3"],
+#         frozenset({"q3", "b"}): ["q3"],
+#     },
+#     start_state="q0",
+#     accept_states=["q0"],
+# )
 # nfa = NFA(
 #     states=["q0", 'q1'],
 #     alphabet=['a', 'b'],
@@ -55,19 +55,28 @@ nfa = NFA(
 #     start_state='q0', accept_states=['q2']
 # )
 
-dfa: DFA = nfa.convert_to_dfa()
+# dfa: DFA = nfa.convert_to_dfa()
 
-print("DFA States:", dfa.states)
-print("DFA Transitions:", dfa.transitions)
-print("DFA Start State:", dfa.start_state)
-print("DFA Accept States:", dfa.accept_states)
-print("DFA States Map:", dfa.states_map)
-regexp = dfa.convert_to_regular_expression()
-print(regexp)
-breakpoint()
-tree = regex.convert_to_tree('a(c+b)*+c')
+# print("DFA States:", dfa.states)
+# print("DFA Transitions:", dfa.transitions)
+# print("DFA Start State:", dfa.start_state)
+# print("DFA Accept States:", dfa.accept_states)
+# print("DFA States Map:", dfa.states_map)
+# regexp = dfa.convert_to_regular_expression()
+# print(regexp)
+# breakpoint()
+epsi_nfa = regex.convert_to_FA('ab+((a+bc)*+(ba*c)*)c')
+
+nfa2 = epsi_nfa.convert_to_nfa()
+
+print("NFA 2 start state", nfa2.start_state)
+print("NFA 2 accept states", nfa2.accept_states)
+print("NFA 2 alphabet", nfa2.alphabet)
+print("NFA 2 states", nfa2.states)
+print("NFA 2 transitions", nfa2.transitions)
 # ((c+b)bcc)*
 # c(d(cb)*+b)
+# a(c+b)*+c
 # c+(b+ab)*+a
 
 # enfa = eNFA(
