@@ -55,7 +55,7 @@ class RegExpression:
         def tree_to_json(node: Node):
             if node is None:
                 return None
-            if node.operand.isalpha():
+            if node.operand.isalnum():
                 return {'value': node.operand}
             left_tree = tree_to_json(node.left)
             right_tree = tree_to_json(node.right)
@@ -65,10 +65,10 @@ class RegExpression:
             return nnode
 
         stack: Union[List[Node], str] = []
-        root: Node = self.update_tree(stack, exp)
+        root: Node = self.__update_tree(stack, exp)
         return tree_to_json(root)
 
-    def update_tree(self, stack: Union[List[Node], str], exp: str) -> Node:
+    def __update_tree(self, stack: Union[List[Node], str], exp: str) -> Node:
         def reduce_group(group: List[Node], reverse: bool = False):
             if reverse:
                 group.reverse()
@@ -76,7 +76,7 @@ class RegExpression:
                 if len(group) == 1:
                     return group.pop()
                 last = group.pop()
-                if last.operand in ['.', '*'] or last.operand.isalpha():
+                if last.operand in ['.', '*'] or last.operand.isalnum():
                     if group[-1].operand == '+':
                         if group[-1].right is None:
                             llast = group.pop()
@@ -87,7 +87,7 @@ class RegExpression:
                             node.left = group.pop()
                             node.right = last
                             group.append(node)
-                    elif group[-1].operand.isalpha():
+                    elif group[-1].operand.isalnum():
                         node = Node('.')
                         node.left = group.pop()
                         node.right = last
@@ -98,6 +98,7 @@ class RegExpression:
                     node.right = last
                     group.append(node)
             return group.pop()
+
         for char in exp:
             match char:
                 case self.RIGHT_PAREN:
