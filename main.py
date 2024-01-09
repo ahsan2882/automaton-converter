@@ -1,6 +1,7 @@
 from dfa import DFA
 from nfa import NFA, eNFA
 from regexpressions import RegExpression
+
 regex = RegExpression()
 
 # nfa = NFA(
