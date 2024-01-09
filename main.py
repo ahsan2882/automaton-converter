@@ -74,6 +74,16 @@ print("NFA 2 accept states", nfa2.accept_states)
 print("NFA 2 alphabet", nfa2.alphabet)
 print("NFA 2 states", nfa2.states)
 print("NFA 2 transitions", nfa2.transitions)
+
+dfa2 = nfa2.convert_to_dfa()
+print("DFA States:", dfa2.states)
+print("DFA Transitions:", dfa2.transitions)
+print("DFA Start State:", dfa2.start_state)
+print("DFA Accept States:", dfa2.accept_states)
+print("DFA States Map:", dfa2.states_map)
+# breakpoint()
+# min_dfa = dfa2.minimize_dfa(
+#     states=dfa2.states, transitions=dfa2.transitions, accept_states=dfa2.accept_states)
 # ((c+b)bcc)*
 # c(d(cb)*+b)
 # a(c+b)*+c
