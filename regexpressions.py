@@ -124,7 +124,7 @@ class RegExpression:
                              transitions: Dict[FrozenSet[str], List[str]],
                              alphabets: List[str], initial_state: str, final_state: str):
         def create_new_state():
-            return f"Q{len(states)}"
+            return f"q{len(states)}"
 
         if node.operand == self.UNION:
             # accept_states.append(new_state)
@@ -167,8 +167,8 @@ class RegExpression:
 
     def convert_to_FA(self, regexp: str):
         root: Node = self.__convert_to_tree(regexp)
-        start_state = 'Q0'
-        accept_state: str = 'Q1'
+        start_state = 'q0'
+        accept_state: str = 'q1'
         states: List[str] = [start_state, accept_state]
         transitions: Dict[FrozenSet[str], List[str]] = {}
         alphabets: List[str] = []
