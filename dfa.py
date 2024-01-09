@@ -1,5 +1,5 @@
 import re
-from typing import Dict, FrozenSet, List, Tuple, Union
+from typing import Dict, FrozenSet, List, Tuple
 
 
 class DFA:
@@ -218,3 +218,54 @@ class DFA:
             if char not in self.alphabet:
                 raise Exception(
                     f"Invalid character {char} in string. {char} doesn't exist in input alphabets.")
+
+    # def minimize_dfa(self, states: List[str], transitions: Dict[FrozenSet[str], str], accept_states: List[str]):
+    #     def are_partitions_equal(group1: List[List[str]], group2: List[List[str]]) -> bool:
+    #         set1 = {frozenset(sublist)
+    #                 for sublist in map(frozenset, group1)}
+    #         set2 = {frozenset(sublist)
+    #                 for sublist in map(frozenset, group2)}
+    #         return set1 == set2
+
+    #     partitions: List[List[str]] = [
+    #         [state for state in states if state not in accept_states], accept_states]
+    #     # print(partitions)
+
+    #     while True:
+    #         new_partitions: List[List[str]] = []
+    #         # for part in partitions:
+    #         #     for symbol in self.alphabet:
+    #         #         for state in part:
+    #         #             next_state = transitions[frozenset({state,symbol})]
+
+    #         #             pass
+    #         for part in partitions:
+    #             divide = False
+    #             for symbol in self.alphabet:
+    #                 cache = []
+    #                 check_pairs = list(combinations(part, 2))
+    #                 for state in part:
+    #                     next_state = transitions[frozenset({state, symbol})]
+    #                     cache.append(next_state)
+    #                     cache = list(set(cache))
+    #                     # cache = list(
+    #                     #     set(cache.append(transitions[frozenset({state, symbol})])))
+    #                 if len(cache) == 1:
+    #                     # same group
+    #                     divide = False
+    #                 else:
+    #                     # check if elements in cache belong to same group or not
+    #                     cache_set = set(cache)
+    #                     for parts in partitions:
+    #                         if cache_set.issubset(set(parts)) and cache[0] in parts:
+    #                             divide = False
+    #                         else:
+    #                             divide = True
+    #                             break
+    #                     if divide:
+    #                         new_partitions.append([])
+    #                         break
+
+    #         if are_partitions_equal(new_partitions, partitions):
+    #             break
+    #         partitions = new_partitions
