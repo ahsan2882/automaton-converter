@@ -44,6 +44,7 @@ nfa = NFA(
 #     },
 #     start_state='q0', accept_states=['q0', 'q1']
 # )
+
 # nfa = NFA(
 #     states=["q0", 'q1', 'q2'],
 #     alphabet=['a', 'b'],
