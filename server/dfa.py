@@ -1,5 +1,6 @@
 import re
-from typing import Dict, FrozenSet, List, Tuple
+from typing import Dict, FrozenSet, List, Tuple, Set, Tuple, Union
+from graphviz import Digraph
 
 
 class DFA:
@@ -38,6 +39,41 @@ class DFA:
         if P != '':
             return f"({Q})({P})*" if Q != 'ε' else f"({P})*"
         return equation
+    
+    def convert_to_JSON(self) -> Dict[str, Union[str, List[str], Dict[FrozenSet[str], List[str]]]]:
+        def get_transition_state_symbol(transition: FrozenSet[str]) -> Tuple[str, str, List[str]]:
+            input_state = transition_symbol = ''
+            for item in transition:
+                if 'q' in item and len(item) > 1:
+                    input_state = item
+                else:
+                    transition_symbol = item
+            return (input_state, transition_symbol, self.transitions[transition])
+        transitions: Dict[Tuple[str, str], str] = {}
+        for transition in self.transitions:
+            input_state, transition_symbol, output_states = get_transition_state_symbol(transition)
+            for output_state in output_states:
+                transitions[(input_state, transition_symbol)] = output_state
+        
+        return {'states': self.states, 'alphabets': self.alphabet, 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
+
+    def create_graph(self):
+        dfa_json: Dict[str, Union[str, List[str]]] = self.convert_to_JSON()
+
+        dfa_dot = Digraph('DFA', filename='dfa.gv', engine='dot')
+        dfa_dot.attr('node', shape='doublecircle')
+        for state in dfa_json['accept_states']:
+            dfa_dot.node(state, state)
+        dfa_dot.attr('node', shape='circle')
+        dfa_dot.attr(rankdir='LR')
+        for state in dfa_json['states']:
+            if state not in dfa_json['accept_states']:
+                dfa_dot.node(state, state)
+        for transition, symbols in dfa_json['transitions'].items():
+            (state, next_state) = transition
+            dfa_dot.edge(state, next_state, label=symbols)
+
+        dfa_dot.render('dfa', format='svg', cleanup=True)
 
     def __reduce_equation_for_state(self, terms: List[str], state_match: str) -> str:
         grouped_expression = ''
