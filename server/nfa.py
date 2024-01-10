@@ -1,5 +1,8 @@
 from collections import deque
-from typing import Dict, FrozenSet, List, Set
+import json
+from typing import Dict, FrozenSet, List, Set, Tuple, Union
+
+from flask import jsonify
 
 
 class NFA:
@@ -11,12 +14,33 @@ class NFA:
         transitions: Dict[FrozenSet[str], List[str]],
         start_state: str,
         accept_states: List[str],
-    ) -> None:
+    ):
         self.states: List[str] = states
         self.alphabet: List[str] = alphabet
         self.transitions: Dict[FrozenSet[str], List[str]] = transitions
         self.start_state: str = start_state
         self.accept_states: List[str] = accept_states
+
+    def convert_to_JSON(self) -> Dict[str, Union[str, List[str], Dict[FrozenSet[str], List[str]]]]:
+        def get_transition_state_symbol(transition: FrozenSet[str]) -> Tuple[str, str, List[str]]:
+            input_state = transition_symbol = ''
+            for item in transition:
+                if 'q' in item and len(item) > 1:
+                    input_state = item
+                else:
+                    transition_symbol = item
+            return (input_state, transition_symbol, self.transitions[transition])
+        transitions: Dict[Tuple[str, str], str] = {}
+        for transition in self.transitions:
+            (state, symbol, next_states) = get_transition_state_symbol(transition)
+            for next_state in next_states:
+                key = (state, next_state)
+                if key not in transitions:
+                    transitions[key] = symbol
+                else:
+                    transitions[key] += f',{symbol}'
+
+        return {'states': self.states, 'alphabets': self.alphabet, 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
 
     def move(self, states: FrozenSet[str], symbol: str) -> FrozenSet[str]:
         move_states: Set[str] = set()

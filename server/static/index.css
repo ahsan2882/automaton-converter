@@ -1,0 +1,73 @@
+/* Your CSS styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align items to the top */
+  min-height: 100vh; /* Use min-height to keep content centered */
+  background-color: #f3f4f6;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align content to the top */
+  align-items: center; /* Center horizontally */
+  width: 100%;
+  max-width: 100%; /* Full screen width */
+  background-color: #fff;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-top: 20px; /* Create space between heading and top */
+  margin-left: 20px; /* Add left margin */
+  margin-right: 20px; /* Add right margin */
+}
+
+h1 {
+  text-align: center;
+  margin-top: 0; /* Reset margin top */
+}
+
+form {
+  width: 100%;
+}
+
+label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+select {
+  padding: 8px;
+  width: 200px;
+  border-radius: 4px;
+}
+#dynamicContent {
+  width: 100%;
+}
+
+.nfa-input form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  gap: 20px; /* Gap between columns */
+}
+
+.nfa-input form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nfa-input form input[type="text"],
+.submit-btn {
+  max-width: 500px; /* Adjust as needed */
+  width: 100%;
+}
+
+textarea#transitions {
+  grid-column: 2 / span 1; /* Span the second column */
+  width: 300px;
+  height: 200px;
+}

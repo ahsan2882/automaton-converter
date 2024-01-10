@@ -1,6 +1,12 @@
+import json
+import pprint
+from typing import Dict, List, Union
+from graphviz import Digraph
+
 from dfa import DFA
 from nfa import NFA, eNFA
 from regexpressions import RegExpression
+
 
 regex = RegExpression()
 
@@ -20,6 +26,22 @@ nfa = NFA(
     start_state="q0",
     accept_states=["q0"],
 )
+nfa_json: Dict[str, Union[str, List[str]]] = nfa.convert_to_JSON()
+nfa_dot = Digraph('NFA', filename='nfa.gv', engine='dot')
+nfa_dot.attr('node', shape='doublecircle')
+for state in nfa_json['accept_states']:
+    nfa_dot.node(state, state)
+nfa_dot.attr('node', shape='circle')
+nfa_dot.attr(rankdir='LR')
+for state in nfa_json['states']:
+    if state not in nfa_json['accept_states']:
+        nfa_dot.node(state, state)
+for transition, symbols in nfa_json['transitions'].items():
+    print(transition, symbols)
+    (state, next_state) = transition
+    nfa_dot.edge(state, next_state, label=symbols)
+
+nfa_dot.render('nfa', format='svg', cleanup=True)
 # nfa = NFA(
 #     states=["q0", 'q1'],
 #     alphabet=['a', 'b'],
@@ -57,32 +79,32 @@ nfa = NFA(
 #     start_state='q0', accept_states=['q2']
 # )
 
-dfa: DFA = nfa.convert_to_dfa()
+# dfa: DFA = nfa.convert_to_dfa()
 
-print("DFA States:", dfa.states)
-print("DFA Transitions:", dfa.transitions)
-print("DFA Start State:", dfa.start_state)
-print("DFA Accept States:", dfa.accept_states)
-print("DFA States Map:", dfa.states_map)
-# regexp = dfa.convert_to_regular_expression()
-# print(regexp)
-# breakpoint()
-epsi_nfa = regex.convert_to_FA('ab+((a+bc)*+(ba*c)*)c')
+# print("DFA States:", dfa.states)
+# print("DFA Transitions:", dfa.transitions)
+# print("DFA Start State:", dfa.start_state)
+# print("DFA Accept States:", dfa.accept_states)
+# print("DFA States Map:", dfa.states_map)
+# # regexp = dfa.convert_to_regular_expression()
+# # print(regexp)
+# # breakpoint()
+# epsi_nfa = regex.convert_to_FA('ab+((a+bc)*+(ba*c)*)c')
 
-nfa2 = epsi_nfa.convert_to_nfa()
+# nfa2 = epsi_nfa.convert_to_nfa()
 
-print("NFA 2 start state", nfa2.start_state)
-print("NFA 2 accept states", nfa2.accept_states)
-print("NFA 2 alphabet", nfa2.alphabet)
-print("NFA 2 states", nfa2.states)
-print("NFA 2 transitions", nfa2.transitions)
+# print("NFA 2 start state", nfa2.start_state)
+# print("NFA 2 accept states", nfa2.accept_states)
+# print("NFA 2 alphabet", nfa2.alphabet)
+# print("NFA 2 states", nfa2.states)
+# print("NFA 2 transitions", nfa2.transitions)
 
-dfa2 = nfa2.convert_to_dfa()
-print("DFA States:", dfa2.states)
-print("DFA Transitions:", dfa2.transitions)
-print("DFA Start State:", dfa2.start_state)
-print("DFA Accept States:", dfa2.accept_states)
-print("DFA States Map:", dfa2.states_map)
+# dfa2 = nfa2.convert_to_dfa()
+# print("DFA States:", dfa2.states)
+# print("DFA Transitions:", dfa2.transitions)
+# print("DFA Start State:", dfa2.start_state)
+# print("DFA Accept States:", dfa2.accept_states)
+# print("DFA States Map:", dfa2.states_map)
 # breakpoint()
 # min_dfa = dfa2.minimize_dfa(
 #     states=dfa2.states, transitions=dfa2.transitions, accept_states=dfa2.accept_states)
