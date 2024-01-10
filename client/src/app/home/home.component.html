@@ -1,23 +1,117 @@
-<div class="flex flex-col justify-start items-center w-full max-w-full bg-white p-5 box-border mt-5 mx-5">
-    <h1 class="font-bold text-2xl">Automaton Converter</h1>
-    <form class="self-start flex flex-col items-start">
-        <label for="automatonType">Input Automaton Type:</label>
-        <select [formControl]="dropdownControl" id="automatonType" name="automatonType" class="border border-1 border-black outline outline-1 outline-black mt-2">
-            <option *ngFor="let item of dropdownItems" [value]="item">{{ item }}</option>
-        </select>
-    </form>
-    <ng-container [ngSwitch]="selectedFA">
-        <ng-container *ngSwitchCase="automaton.NFA">
-            <div>NFA</div>
-        </ng-container>
-        <ng-container *ngSwitchCase="automaton.E_NFA">
-            <div>E_NFA</div>
-        </ng-container>
-        <ng-container *ngSwitchCase="automaton.DFA">
-            <div>DFA</div>
-        </ng-container>
-        <ng-container *ngSwitchCase="automaton.REGEXP">
-            <div>REGEXP</div>
-        </ng-container>
+<div
+  class="flex flex-col justify-start items-center w-full max-w-full bg-white p-5 box-border mt-5"
+>
+  <h1 class="font-bold text-2xl">Automaton Converter</h1>
+  <p class="text-lg">Convert any automaton into others</p>
+  <form class="self-start flex flex-col items-start ml-32">
+    <label for="automatonType">Input Automaton Type:</label>
+    <select
+      [formControl]="dropdownControl"
+      id="automatonType"
+      name="automatonType"
+      class="border border-1 border-black outline outline-1 outline-black mt-2"
+    >
+      <option *ngFor="let item of dropdownItems" [value]="item">
+        {{ item }}
+      </option>
+    </select>
+  </form>
+  <ng-container [ngSwitch]="selectedFA">
+    <ng-container *ngSwitchCase="automaton.NFA">
+      <form
+        class="flex justify-evenly items-start mt-3 w-full mx-5"
+        [formGroup]="finiteAutomatonFeatures"
+      >
+        <div class="flex flex-col justify-evenly items-start min-w-[45rem]">
+          <div class="w-full flex flex-col mt-3">
+            <label for="alphabets">Alphabets:</label>
+            <input
+              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              type="text"
+              formControlName="alphabet"
+              placeholder="a,b,c,0,1,2"
+              id="alphabets"
+              name="alphabets"
+            />
+          </div>
+          <div class="w-full flex flex-col mt-3">
+            <label for="states">States:</label>
+            <input
+              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              type="text"
+              id="states"
+              name="states"
+              formControlName="states"
+              placeholder="q0,q1,q2..."
+            />
+          </div>
+          <div class="w-full flex flex-col mt-3">
+            <label for="startState">Initial State:</label>
+            <input
+              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              type="text"
+              formControlName="startState"
+              placeholder="q0"
+              id="startState"
+              name="startState"
+            />
+          </div>
+          <div class="w-full flex flex-col mt-3">
+            <label for="finalStates">Final States:</label>
+            <input
+              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              id="finalStates"
+              name="finalStates"
+              type="text"
+              formControlName="acceptStates"
+              placeholder="q1,q2..."
+            />
+          </div>
+          <div class="w-full flex flex-col mt-3">
+            <button
+              type="submit"
+              class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14"
+            >
+              Convert NFA to other automaton
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="flex flex-col justify-start items-start">
+            <label for="transitions">Transitions</label>
+            <textarea
+              class="w-96 h-80 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              formControlName="transitions"
+              id="'transitions"
+              name="transitions"
+              placeholder="(q0,a)->q1&#10;(q1,b)->q2"
+            ></textarea>
+          </div>
+        </div>
+      </form>
+
+      <div class="w-full flex flex-col justify-start items-center mt-10">
+        <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
+        <div>
+          <img
+            height="100px"
+            width="500px"
+            src="assets/img/nfa.svg"
+            alt="DFA"
+          />
+        </div>
+        <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
+        <p class="text-lg">(ab+ba)*</p>
+      </div>
     </ng-container>
+    <ng-container *ngSwitchCase="automaton.E_NFA">
+      <div class="">E_NFA</div>
+    </ng-container>
+    <ng-container *ngSwitchCase="automaton.DFA">
+      <div class="">DFA</div>
+    </ng-container>
+    <ng-container *ngSwitchCase="automaton.REGEXP">
+      <div class="">REGEXP</div>
+    </ng-container>
+  </ng-container>
 </div>
