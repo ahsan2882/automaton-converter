@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, FormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder,
+  UntypedFormControl,
+  FormGroup,
+} from '@angular/forms';
 
 enum FA {
   NFA = 'NFA',
@@ -18,7 +22,6 @@ export class HomeComponent implements OnInit {
   dropdownItems = [FA.NFA, FA.E_NFA, FA.DFA, FA.REGEXP];
   dropdownControl = new UntypedFormControl(this.dropdownItems[0]);
   selectedFA = this.dropdownItems[0];
-  constructor(private formBuilder: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.dropdownControl.valueChanges.subscribe((value: FA) => {
