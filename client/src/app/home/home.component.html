@@ -1,0 +1,23 @@
+<div class="flex flex-col justify-start items-center w-full max-w-full bg-white p-5 box-border mt-5 mx-5">
+    <h1 class="font-bold text-2xl">Automaton Converter</h1>
+    <form class="self-start flex flex-col items-start">
+        <label for="automatonType">Input Automaton Type:</label>
+        <select [formControl]="dropdownControl" id="automatonType" name="automatonType" class="border border-1 border-black outline outline-1 outline-black mt-2">
+            <option *ngFor="let item of dropdownItems" [value]="item">{{ item }}</option>
+        </select>
+    </form>
+    <ng-container [ngSwitch]="selectedFA">
+        <ng-container *ngSwitchCase="automaton.NFA">
+            <div>NFA</div>
+        </ng-container>
+        <ng-container *ngSwitchCase="automaton.E_NFA">
+            <div>E_NFA</div>
+        </ng-container>
+        <ng-container *ngSwitchCase="automaton.DFA">
+            <div>DFA</div>
+        </ng-container>
+        <ng-container *ngSwitchCase="automaton.REGEXP">
+            <div>REGEXP</div>
+        </ng-container>
+    </ng-container>
+</div>
