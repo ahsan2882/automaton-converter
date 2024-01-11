@@ -156,12 +156,12 @@
           <img
             height="100px"
             width="500px"
-            src="assets/img/nfa.svg"
+            [src]="equivalentDFA_image"
             alt="DFA"
           />
         </div>
         <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
-        <p class="text-lg">(ab+ba)*</p>
+        <p class="text-lg">{{ equivalentRegexp }}</p>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="automaton.E_NFA">
