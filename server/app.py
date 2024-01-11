@@ -17,7 +17,63 @@ def render_home():
 @app.route('/api/input_nfa', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def input_nfa():
-    return 'success'
+    payload = request.get_json()
+    transitions_payload = payload['transitions']
+    transitions = {}
+
+    for transition in transitions_payload:
+        key = frozenset({transition['state'], transition['symbol']})
+        if key in transitions:
+            transitions[key].append(transition['next_state'])
+        else:
+            transitions[key] = [transition['next_state']]
+    nfa = NFA(
+        states=payload['states'],
+        alphabet=payload['alphabets'],
+        transitions=transitions,
+        start_state=payload['startState'],
+        accept_states=payload['acceptStates'],
+    )
+
+    dfa: DFA = nfa.convert_to_dfa()
+    states_map = {str(tuple(k)): v for k, v in dfa.states_map.items()}
+    transitions = {str(tuple(k)): v for k, v in dfa.transitions.items()}
+    my_dict = {
+        "states": dfa.states,
+        "state_maps": states_map,
+        "transitions": transitions,
+        "start_state": dfa.start_state,
+        "accept_states": dfa.accept_states
+    }
+    return jsonify(my_dict)
+
+
+@app.route('/api/input_dfa', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def input_nfa():
+    payload = request.get_json()
+    transitions_payload = payload['transitions']
+    transitions = {}
+
+    for transition in transitions_payload:
+        key = frozenset({transition['state'], transition['symbol']})
+        if key in transitions:
+            transitions[key].append(transition['next_state'])
+        else:
+            transitions[key] = [transition['next_state']]
+    dfa = DFA(
+        states=payload['states'],
+        accept_states=payload['acceptStates'],
+        alphabet=payload['alphabets'],
+        transitions=transitions,
+        start_state=payload['startState']
+    )
+
+    regexp = dfa.convert_to_regular_expression()
+    my_dict = {
+        "regex": regexp,
+    }
+    return jsonify(my_dict)
 
 
 @app.route('/api/input_type', methods=['POST'])
