@@ -103,6 +103,32 @@ def input_dfa():
                'result_regexp': regexp}
     return jsonify(my_dict)
 
+@app.route('/api/input_regex', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def input_regex():
+    payload = request.get_json()
+    regex = RegExpression()
+    epsilon_NFA = regex.convert_to_FA(payload['regex'])
+    epsilon_path = epsilon_NFA.create_graph('enfa1')
+    nfa: NFA = epsilon_NFA.convert_to_nfa()
+    nfa_path = nfa.create_graph('nfa')
+    dfa: DFA = nfa.convert_to_dfa()
+    dfa_path = dfa.create_graph('equivalentDFA')
+    try:
+        with open(epsilon_path, "rb") as image_file:
+            enfa_img = base64.b64encode(image_file.read()).decode()
+        with open(nfa_path, "rb") as image_file:
+            nfa_img = base64.b64encode(image_file.read()).decode()
+        with open(dfa_path, "rb") as image_file:
+            dfa_img = base64.b64encode(image_file.read()).decode()
+    except FileNotFoundError:
+        return jsonify({"error": "Image file not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    regexp = dfa.convert_to_regular_expression()
+    response = {'result_dfa': dfa_img,
+                'result_regexp': regexp, 'result_nfa': nfa_img, 'result_enfa': enfa_img}
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
