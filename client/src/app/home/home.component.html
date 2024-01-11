@@ -283,7 +283,7 @@
               type="submit"
               (click)="submitValues()"
             >
-              Convert NFA to other automaton
+              Convert ε-NFA to other automaton
             </button>
           </div>
         </div>
@@ -466,7 +466,7 @@
               type="submit"
               (click)="submitValues()"
             >
-              Convert NFA to other automaton
+              Convert DFA to regexp
             </button>
           </div>
         </div>
@@ -534,90 +534,69 @@
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="automaton.REGEXP">
-      <form
-        class="flex justify-evenly items-start mt-3 w-full mx-5"
-        [formGroup]="finiteAutomatonFeatures"
-        (submit)="submitValues()"
-      >
-        <div class="flex flex-col justify-evenly items-start min-w-[45rem]">
+      <div class="flex justify-start items-start mt-3 w-full ml-96">
+        <div class="flex flex-col justify-start items-start min-w-[45rem]">
           <div class="w-full flex flex-col mt-3">
-            <label for="alphabets">Alphabets:</label>
+            <label for="regex">Regexp:</label>
             <input
               class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
               type="text"
-              formControlName="alphabet"
-              placeholder="a,b,c,0,1,2"
-              id="alphabets"
-              name="alphabets"
+              placeholder="(a+b)*+ε"
+              id="regex"
+              [formControl]="fa_regexpControl"
+              name="regex"
             />
           </div>
           <div class="w-full flex flex-col mt-3">
-            <label for="states">States:</label>
-            <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
-              type="text"
-              id="states"
-              name="states"
-              formControlName="states"
-              placeholder="q0,q1,q2..."
-            />
-          </div>
-          <div class="w-full flex flex-col mt-3">
-            <label for="startState">Initial State:</label>
-            <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
-              type="text"
-              formControlName="startState"
-              placeholder="q0"
-              id="startState"
-              name="startState"
-            />
-          </div>
-          <div class="w-full flex flex-col mt-3">
-            <label for="finalStates">Final States:</label>
-            <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
-              id="finalStates"
-              name="finalStates"
-              type="text"
-              formControlName="acceptStates"
-              placeholder="q1,q2..."
-            />
+            <button
+              class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14 disabled:bg-amber-300 disabled:cursor-not-allowed"
+              type="submit"
+              (click)="submitValues()"
+            >
+              Convert Regexp to other automaton
+            </button>
           </div>
         </div>
-        <div>
-          <div class="flex flex-col justify-start items-start">
-            <label for="transitions">Transitions</label>
-            <textarea
-              class="w-96 h-80 border border-1 border-black outline outline-1 outline-black px-2 py-1"
-              formControlName="transitions"
-              id="'transitions"
-              name="transitions"
-              placeholder="(q0,a)->q1&#10;(q1,b)->q2"
-            ></textarea>
-          </div>
-        </div>
-      </form>
-      <div class="w-full flex flex-col mt-3">
-        <button
-          class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14 disabled:bg-amber-200 disabled:cursor-not-allowed"
-          (click)="submitValues()"
-        >
-          Convert NFA to other automatons
-        </button>
       </div>
+
       <div class="w-full flex flex-col justify-start items-center mt-10">
-        <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
-        <div>
-          <img
-            height="100px"
-            width="500px"
-            src="assets/img/nfa.svg"
-            alt="DFA"
-          />
-        </div>
-        <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
-        <p class="text-lg">(ab+ba)*</p>
+        <ng-container *ngIf="equivalentRegexp">
+          <h3 class="text-xl self-start ml-32">Input Regexp</h3>
+          <p class="text-lg">{{ equivalentRegexp }}</p>
+        </ng-container>
+        <ng-container *ngIf="equivalent_eNFA_image">
+          <h3 class="text-xl self-start ml-32">Equivalent Epsilon NFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalent_eNFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentNFA_image">
+          <h3 class="text-xl self-start ml-32">Equivalent NFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentNFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentDFA_image">
+          <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentDFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
       </div>
     </ng-container>
   </ng-container>

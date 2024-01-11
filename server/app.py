@@ -103,12 +103,14 @@ def input_dfa():
                'result_regexp': regexp}
     return jsonify(my_dict)
 
-@app.route('/api/input_regex', methods=['POST'])
+
+@app.route('/api/input_regexp', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def input_regex():
     payload = request.get_json()
+    print(payload)
     regex = RegExpression()
-    epsilon_NFA = regex.convert_to_FA(payload['regex'])
+    epsilon_NFA = regex.convert_to_FA(payload['regexp'])
     epsilon_path = epsilon_NFA.create_graph('enfa1')
     nfa: NFA = epsilon_NFA.convert_to_nfa()
     nfa_path = nfa.create_graph('nfa')
@@ -129,6 +131,7 @@ def input_regex():
     response = {'result_dfa': dfa_img,
                 'result_regexp': regexp, 'result_nfa': nfa_img, 'result_enfa': enfa_img}
     return jsonify(response)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

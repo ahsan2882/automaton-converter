@@ -22,8 +22,8 @@ enum FA {
 export class HomeComponent implements OnInit {
   automaton = FA;
   dropdownItems = [FA.NFA, FA.E_NFA, FA.DFA, FA.REGEXP];
-  dropdownControl = new UntypedFormControl(this.dropdownItems[2]);
-  selectedFA = this.dropdownItems[2];
+  dropdownControl = new UntypedFormControl(this.dropdownItems[3]);
+  selectedFA = this.dropdownItems[3];
 
   API_URL = 'http://127.0.0.1:5000/api';
 
@@ -32,6 +32,7 @@ export class HomeComponent implements OnInit {
   fa_startState = new UntypedFormControl('', [Validators.required]);
   fa_acceptStates = new UntypedFormControl('', [Validators.required]);
   fa_transitionsControl = new UntypedFormControl('', [Validators.required]);
+  fa_regexpControl = new UntypedFormControl('', [Validators.required]);
 
   equivalentNFA_image: SafeResourceUrl = '';
   equivalentDFA_image: SafeResourceUrl = '';
@@ -185,6 +186,41 @@ export class HomeComponent implements OnInit {
         this.equivalentRegexp = response.result_regexp;
       });
   }
+  submitRegexp(regexp: string) {
+    this.httpClient
+      .post<FA_Response>(
+        `${this.API_URL}/input_regexp`,
+        {
+          regexp,
+        },
+        {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          }),
+        }
+      )
+      .subscribe((response: FA_Response) => {
+        console.log(response);
+        if (response?.result_nfa) {
+          this.equivalentNFA_image =
+            this._sanitizer.bypassSecurityTrustResourceUrl(
+              'data:image/svg+xml;base64,' + response.result_nfa
+            );
+        }
+        if (response?.result_enfa) {
+          this.equivalent_eNFA_image =
+            this._sanitizer.bypassSecurityTrustResourceUrl(
+              'data:image/svg+xml;base64,' + response.result_enfa
+            );
+        }
+        this.equivalentDFA_image =
+          this._sanitizer.bypassSecurityTrustResourceUrl(
+            'data:image/svg+xml;base64,' + response.result_dfa
+          );
+        this.equivalentRegexp = response.result_regexp;
+      });
+  }
 
   submit_NFA(
     alphabets: string[],
@@ -232,23 +268,40 @@ export class HomeComponent implements OnInit {
       });
   }
   submitValues(): void {
-    const transitions = this.getTransitions();
-    const alphabets: string[] = this.fa_alphabetControl.value.split(',');
-    const states: string[] = this.fa_statesControl.value.split(',');
-    const startState: string = this.fa_startState.value;
-    const acceptStates: string[] = this.fa_acceptStates.value.split(',');
-    console.log({ alphabets, states, startState, acceptStates, transitions });
-    if (this.selectedFA === FA.NFA || this.selectedFA === FA.E_NFA) {
-      this.submit_NFA(alphabets, states, startState, acceptStates, transitions);
-    } else if (this.selectedFA === FA.DFA) {
-      this.submit_DFA(alphabets, states, startState, acceptStates, transitions);
+    if (this.selectedFA !== FA.REGEXP) {
+      const transitions = this.getTransitions();
+      const alphabets: string[] = this.fa_alphabetControl?.value?.split(',');
+      const states: string[] = this.fa_statesControl?.value?.split(',');
+      const startState: string = this.fa_startState?.value;
+      const acceptStates: string[] = this.fa_acceptStates?.value?.split(',');
+      if (this.selectedFA === FA.NFA || this.selectedFA === FA.E_NFA) {
+        this.submit_NFA(
+          alphabets,
+          states,
+          startState,
+          acceptStates,
+          transitions
+        );
+      } else if (this.selectedFA === FA.DFA) {
+        this.submit_DFA(
+          alphabets,
+          states,
+          startState,
+          acceptStates,
+          transitions
+        );
+      }
+    } else {
+      const regexp: string = this.fa_regexpControl?.value;
+      this.submitRegexp(regexp);
     }
   }
 
   private getTransitions(): Transition[] {
     const transitionArray: Transition[] = [];
     let transitionsObj: Transition;
-    const transitions: string[] = this.fa_transitionsControl.value.split('\n');
+    const transitions: string[] =
+      this.fa_transitionsControl?.value?.split('\n');
     transitions.forEach((transition: string) => {
       const [transit, next_state] = transition.split('->');
       const [state, symbol] = transit
