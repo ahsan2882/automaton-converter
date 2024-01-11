@@ -1,17 +1,11 @@
-from flask import Flask, jsonify, render_template, request
 from dfa import DFA
+from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 from nfa import NFA, eNFA
 from regexpressions import RegExpression
-from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 CORS(app, support_credentials=True)
-
-
-@app.route('/', methods=['GET'])
-@cross_origin(supports_credentials=True)
-def render_home():
-    return render_template("index.html")
 
 
 @app.route('/api/input_nfa', methods=['POST'])
@@ -74,20 +68,6 @@ def input_dfa():
         "regex": regexp,
     }
     return jsonify(my_dict)
-
-
-@app.route('/api/input_type', methods=['POST'])
-@cross_origin(supports_credentials=True)
-def input_type():
-    selected_item = request.form['selection']
-    if selected_item == 'nfa':
-        return render_template('nfa-input.html')
-    elif selected_item == 'epsilon-nfa':
-        return render_template('epsilon-nfa-input.html')
-    elif selected_item == 'dfa':
-        return render_template('dfa-input.html')
-    else:
-        return render_template('regexp-input.html')
 
 
 @app.route('/api/nfa_to_dfa', methods=['GET'])
