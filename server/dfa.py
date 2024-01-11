@@ -18,6 +18,22 @@ class DFA:
         self.start_state = start_state
         self.accept_states = accept_states
         self.states_map = states_map
+        self.__check_complete_transitions()
+
+    def __check_complete_transitions(self):
+        dead_state = f'Q{len(self.states)}'
+        append_dead_state = False
+        for state in self.states:
+            for symbol in self.alphabet:
+                key = frozenset({state, symbol})
+                if key not in self.transitions:
+                    self.transitions[key] = dead_state
+                    append_dead_state = True
+        if append_dead_state:
+            self.states.append(dead_state)
+            for symbol in self.alphabet:
+                key = frozenset({dead_state, symbol})
+                self.transitions[key] = dead_state
 
     def __arden_theorem(self, state: str, equations: str,) -> str:
         equation = self.__reduce_equation_for_state(
