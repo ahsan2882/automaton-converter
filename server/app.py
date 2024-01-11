@@ -50,7 +50,7 @@ def input_nfa():
 
 @app.route('/api/input_dfa', methods=['POST'])
 @cross_origin(supports_credentials=True)
-def input_nfa():
+def input_dfa():
     payload = request.get_json()
     transitions_payload = payload['transitions']
     transitions = {}

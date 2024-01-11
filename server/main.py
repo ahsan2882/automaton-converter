@@ -1,5 +1,4 @@
 import json
-import pprint
 from typing import Dict, List, Union
 from graphviz import Digraph
 
@@ -27,7 +26,7 @@ nfa = NFA(
     accept_states=["q0"],
 )
 nfa_json: Dict[str, Union[str, List[str]]] = nfa.convert_to_JSON()
-nfa_dot = Digraph('NFA', filename='nfa.gv', engine='dot')
+nfa_dot = Digraph('NFA', filename='nfa3.gv', engine='dot')
 nfa_dot.attr('node', shape='doublecircle')
 for state in nfa_json['accept_states']:
     nfa_dot.node(state, state)
@@ -37,11 +36,10 @@ for state in nfa_json['states']:
     if state not in nfa_json['accept_states']:
         nfa_dot.node(state, state)
 for transition, symbols in nfa_json['transitions'].items():
-    print(transition, symbols)
     (state, next_state) = transition
     nfa_dot.edge(state, next_state, label=symbols)
 
-nfa_dot.render('nfa', format='svg', cleanup=True)
+nfa_dot.render('nfa3', format='svg', cleanup=True)
 # nfa = NFA(
 #     states=["q0", 'q1'],
 #     alphabet=['a', 'b'],
@@ -79,7 +77,8 @@ nfa_dot.render('nfa', format='svg', cleanup=True)
 #     start_state='q0', accept_states=['q2']
 # )
 
-# dfa: DFA = nfa.convert_to_dfa()
+dfa: DFA = nfa.convert_to_dfa()
+dfa.create_graph('dfa2')
 
 # print("DFA States:", dfa.states)
 # print("DFA Transitions:", dfa.transitions)
@@ -113,21 +112,25 @@ nfa_dot.render('nfa', format='svg', cleanup=True)
 # a(c+b)*+c
 # c+(b+ab)*+a
 
-# enfa = eNFA(
-#     states=["q0", "q1", "q2"],
-#     alphabet=["a", "b"],
-#     transitions={
-#         frozenset({"q0", "a"}): ["q0"],
-#         frozenset({"q0", "b"}): ["q1"],
-#         frozenset({"q0", "ε"}): ["q2"],
-#         frozenset({"q1", "a"}): ["q0"],
-#         frozenset({"q2", "b"}): ["q2"],
-#     },
-#     start_state="q0",
-#     accept_states=["q2"],
-# )
+enfa = eNFA(
+    states=["q0", "q1", "q2"],
+    alphabet=["a", "b"],
+    transitions={
+        frozenset({"q0", "a"}): ["q0"],
+        frozenset({"q0", "b"}): ["q1"],
+        frozenset({"q0", "ε"}): ["q2"],
+        frozenset({"q1", "a"}): ["q0"],
+        frozenset({"q2", "b"}): ["q2"],
+    },
+    start_state="q0",
+    accept_states=["q2"],
+)
+enfa.create_graph('enfa1')
 
-# nfa_from_enfa: NFA = enfa.convert_to_nfa()
+nfa_from_enfa: NFA = enfa.convert_to_nfa()
+nfa_from_enfa.create_graph('nfa1')
+dfa_from_enfa: DFA = nfa_from_enfa.convert_to_dfa()
+dfa_from_enfa.create_graph('dfa1')
 
 # dfa2_from_eNFA: DFA = nfa_from_enfa.convert_to_dfa()
 # print("NFA States:", nfa_from_enfa.states)

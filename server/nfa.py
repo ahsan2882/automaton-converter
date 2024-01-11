@@ -50,10 +50,10 @@ class NFA:
                 frozenset({state, symbol}), []))
         return frozenset(move_states)
 
-    def create_graph(self):
+    def create_graph(self, name):
         nfa_json: Dict[str, Union[str, List[str]]] = self.convert_to_JSON()
 
-        nfa_dot = Digraph('NFA', filename='nfa.gv', engine='dot')
+        nfa_dot = Digraph(name, filename=f'{name}.gv', engine='dot')
         nfa_dot.attr('node', shape='doublecircle')
         for state in nfa_json['accept_states']:
             nfa_dot.node(state, state)
@@ -66,7 +66,7 @@ class NFA:
             (state, next_state) = transition
             nfa_dot.edge(state, next_state, label=symbols)
 
-        nfa_dot.render('nfa', format='svg', cleanup=True)
+        nfa_dot.render(name, format='svg', cleanup=True)
 
     def convert_to_dfa(self):
         from dfa import DFA
@@ -136,7 +136,7 @@ class eNFA:
                     stack.append(next_state)
 
         return frozenset(closure)
-    
+
     def convert_to_JSON(self) -> Dict[str, Union[str, List[str], Dict[FrozenSet[str], List[str]]]]:
         def get_transition_state_symbol(transition: FrozenSet[str]) -> Tuple[str, str, List[str]]:
             input_state = transition_symbol = ''
@@ -148,16 +148,20 @@ class eNFA:
             return (input_state, transition_symbol, self.transitions[transition])
         transitions: Dict[Tuple[str, str], str] = {}
         for transition in self.transitions:
-            input_state, transition_symbol, output_states = get_transition_state_symbol(transition)
-            for output_state in output_states:
-                transitions[(input_state, transition_symbol)] = output_state
-        
-        return {'states': self.states, 'alphabets': self.alphabet, 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
+            (state, symbol, next_states) = get_transition_state_symbol(transition)
+            for next_state in next_states:
+                key = (state, next_state)
+                if key not in transitions:
+                    transitions[key] = symbol
+                else:
+                    transitions[key] += f',{symbol}'
 
-    def create_graph(self):
+        return {'states': self.states, 'alphabets': [*self.alphabet, 'ε'], 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
+
+    def create_graph(self, name: str):
         nfa_json: Dict[str, Union[str, List[str]]] = self.convert_to_JSON()
 
-        nfa_dot = Digraph('NFA', filename='nfa.gv', engine='dot')
+        nfa_dot = Digraph(name, filename=f'{name}.gv', engine='dot')
         nfa_dot.attr('node', shape='doublecircle')
         for state in nfa_json['accept_states']:
             nfa_dot.node(state, state)
@@ -170,7 +174,7 @@ class eNFA:
             (state, next_state) = transition
             nfa_dot.edge(state, next_state, label=symbols)
 
-        nfa_dot.render('nfa', format='svg', cleanup=True)
+        nfa_dot.render(name, format='svg', cleanup=True)
 
     def convert_to_nfa(self) -> NFA:
         new_transitions: Dict[FrozenSet[str], List] = {}

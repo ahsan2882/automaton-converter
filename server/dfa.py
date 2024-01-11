@@ -18,13 +18,6 @@ class DFA:
         self.start_state = start_state
         self.accept_states = accept_states
         self.states_map = states_map
-        self.__check_symbol_in_transitions()
-
-    def __check_symbol_in_transitions(self):
-        for transition in self.transitions:
-            (_, symbol) = self.__get_transition_state_symbol(transition)
-            if symbol not in self.alphabet:
-                raise Exception(f"Invalid character {symbol} in transitions.")
 
     def __arden_theorem(self, state: str, equations: str,) -> str:
         equation = self.__reduce_equation_for_state(
@@ -39,28 +32,30 @@ class DFA:
         if P != '':
             return f"({Q})({P})*" if Q != 'ε' else f"({P})*"
         return equation
-    
-    def convert_to_JSON(self) -> Dict[str, Union[str, List[str], Dict[FrozenSet[str], List[str]]]]:
-        def get_transition_state_symbol(transition: FrozenSet[str]) -> Tuple[str, str, List[str]]:
+
+    def convert_to_JSON(self) -> Dict[str, Union[str, List[str], Tuple[str, str], str]]:
+        def get_transition_state_symbol(transition: FrozenSet[str]) -> Tuple[str, str, str]:
             input_state = transition_symbol = ''
             for item in transition:
-                if 'q' in item and len(item) > 1:
+                if 'Q' in item and len(item) > 1:
                     input_state = item
                 else:
                     transition_symbol = item
             return (input_state, transition_symbol, self.transitions[transition])
         transitions: Dict[Tuple[str, str], str] = {}
         for transition in self.transitions:
-            input_state, transition_symbol, output_states = get_transition_state_symbol(transition)
-            for output_state in output_states:
-                transitions[(input_state, transition_symbol)] = output_state
-        
+            (state, symbol, next_state) = get_transition_state_symbol(transition)
+            key = (state, next_state)
+            if key not in transitions:
+                transitions[key] = symbol
+            else:
+                transitions[key] += f',{symbol}'
+
         return {'states': self.states, 'alphabets': self.alphabet, 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
 
-    def create_graph(self):
+    def create_graph(self, name: str):
         dfa_json: Dict[str, Union[str, List[str]]] = self.convert_to_JSON()
-
-        dfa_dot = Digraph('DFA', filename='dfa.gv', engine='dot')
+        dfa_dot = Digraph(name.upper(), filename=f'{name}.gv', engine='dot')
         dfa_dot.attr('node', shape='doublecircle')
         for state in dfa_json['accept_states']:
             dfa_dot.node(state, state)
@@ -73,7 +68,7 @@ class DFA:
             (state, next_state) = transition
             dfa_dot.edge(state, next_state, label=symbols)
 
-        dfa_dot.render('dfa', format='svg', cleanup=True)
+        dfa_dot.render(name, format='svg', cleanup=True)
 
     def __reduce_equation_for_state(self, terms: List[str], state_match: str) -> str:
         grouped_expression = ''
@@ -241,9 +236,6 @@ class DFA:
             current_state = self.start_state
             for idx, char in enumerate(string):
                 next_state = self.__simulate_transition(current_state, char)
-
-                print(
-                    f"current_state: {current_state}, symbol: {char}[pos]:{idx} next_state: {next_state}")
                 current_state = next_state
             return current_state in self.accept_states
         else:
@@ -254,54 +246,3 @@ class DFA:
             if char not in self.alphabet:
                 raise Exception(
                     f"Invalid character {char} in string. {char} doesn't exist in input alphabets.")
-
-    # def minimize_dfa(self, states: List[str], transitions: Dict[FrozenSet[str], str], accept_states: List[str]):
-    #     def are_partitions_equal(group1: List[List[str]], group2: List[List[str]]) -> bool:
-    #         set1 = {frozenset(sublist)
-    #                 for sublist in map(frozenset, group1)}
-    #         set2 = {frozenset(sublist)
-    #                 for sublist in map(frozenset, group2)}
-    #         return set1 == set2
-
-    #     partitions: List[List[str]] = [
-    #         [state for state in states if state not in accept_states], accept_states]
-    #     # print(partitions)
-
-    #     while True:
-    #         new_partitions: List[List[str]] = []
-    #         # for part in partitions:
-    #         #     for symbol in self.alphabet:
-    #         #         for state in part:
-    #         #             next_state = transitions[frozenset({state,symbol})]
-
-    #         #             pass
-    #         for part in partitions:
-    #             divide = False
-    #             for symbol in self.alphabet:
-    #                 cache = []
-    #                 check_pairs = list(combinations(part, 2))
-    #                 for state in part:
-    #                     next_state = transitions[frozenset({state, symbol})]
-    #                     cache.append(next_state)
-    #                     cache = list(set(cache))
-    #                     # cache = list(
-    #                     #     set(cache.append(transitions[frozenset({state, symbol})])))
-    #                 if len(cache) == 1:
-    #                     # same group
-    #                     divide = False
-    #                 else:
-    #                     # check if elements in cache belong to same group or not
-    #                     cache_set = set(cache)
-    #                     for parts in partitions:
-    #                         if cache_set.issubset(set(parts)) and cache[0] in parts:
-    #                             divide = False
-    #                         else:
-    #                             divide = True
-    #                             break
-    #                     if divide:
-    #                         new_partitions.append([])
-    #                         break
-
-    #         if are_partitions_equal(new_partitions, partitions):
-    #             break
-    #         partitions = new_partitions
