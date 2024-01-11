@@ -73,59 +73,35 @@ def input_dfa():
     payload = request.get_json()
     transitions_payload = payload['transitions']
     transitions = {}
+    print(transitions_payload)
 
     for transition in transitions_payload:
-        key = frozenset({transition['state'], transition['symbol']})
-        if key in transitions:
-            transitions[key].append(transition['next_state'])
-        else:
-            transitions[key] = [transition['next_state']]
+        key = frozenset({str(transition['state']).replace(
+            'q', 'Q'), transition['symbol']})
+        if key not in transitions:
+            transitions[key] = str(transition['next_state']).replace('q', 'Q')
     dfa = DFA(
-        states=payload['states'],
-        accept_states=payload['acceptStates'],
+        states=[state.replace('q', 'Q') for state in payload['states']],
+        accept_states=[state.replace('q', 'Q')
+                       for state in payload['acceptStates']],
         alphabet=payload['alphabets'],
         transitions=transitions,
-        start_state=payload['startState']
+        start_state=payload['startState'].replace('q', 'Q')
     )
+
+    dfa_path = dfa.create_graph('dfa')
+    try:
+        with open(dfa_path, "rb") as image_file:
+            dfa_img = base64.b64encode(image_file.read()).decode()
+    except FileNotFoundError:
+        return jsonify({"error": "Image file not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     regexp = dfa.convert_to_regular_expression()
-    my_dict = {
-        "regex": regexp,
-    }
+    my_dict = {'result_dfa': dfa_img,
+               'result_regexp': regexp}
     return jsonify(my_dict)
-
-
-@app.route('/api/nfa_to_dfa', methods=['GET'])
-@cross_origin(supports_credentials=True)
-def get_nfa():
-    nfa = NFA(
-        states=["q0", "q1", "q2", "q3"],
-        alphabet=["a", "b"],
-        transitions={
-            frozenset({"q0", "a"}): ["q1"],
-            frozenset({"q0", "b"}): ["q2"],
-            frozenset({"q1", "a"}): ["q3"],
-            frozenset({"q1", "b"}): ["q0"],
-            frozenset({"q2", "a"}): ["q0"],
-            frozenset({"q2", "b"}): ["q3"],
-            frozenset({"q3", "a"}): ["q3"],
-            frozenset({"q3", "b"}): ["q3"],
-        },
-        start_state="q0",
-        accept_states=["q0"],
-    )
-
-    dfa: DFA = nfa.convert_to_dfa()
-    states_map = {str(tuple(k)): v for k, v in dfa.states_map.items()}
-    transitions = {str(tuple(k)): v for k, v in dfa.transitions.items()}
-    my_dict = {
-        "states": dfa.states,
-        "state_maps": states_map,
-        "transitions": transitions,
-        "start_state": dfa.start_state,
-        "accept_states": dfa.accept_states
-    }
-    return jsonify(my_dict)  # assuming NFA has a to_dict method
 
 
 if __name__ == '__main__':

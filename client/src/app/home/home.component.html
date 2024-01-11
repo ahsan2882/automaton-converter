@@ -121,6 +121,14 @@
             <p
               class="no-select"
               [ngClass]="
+                showInvalidEpsilonError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidEpsilonError }}
+            </p>
+            <p
+              class="no-select"
+              [ngClass]="
                 showInvalidAlphabetError ? 'text-red-600' : 'text-transparent'
               "
             >
@@ -141,7 +149,9 @@
               name="transitions"
               placeholder="(q0,a)->q1&#10;(q1,b)->q2"
               [ngClass]="
-                showInvalidAlphabetError || showInvalidStateError
+                showInvalidAlphabetError ||
+                showInvalidStateError ||
+                showInvalidEpsilonError
                   ? 'border-red-600 outline-red-600'
                   : 'border-black outline-black'
               "
@@ -184,7 +194,7 @@
         class="flex justify-evenly items-start mt-3 w-full mx-5"
         [formGroup]="finiteAutomatonFeatures"
       >
-        <div class="flex flex-col justify-evenly items-start min-w-[45rem]">
+        <div class="flex flex-col justify-start items-start min-w-[45rem]">
           <div class="w-full flex flex-col mt-3">
             <label for="alphabets">Alphabets:</label>
             <input
@@ -208,62 +218,158 @@
             />
           </div>
           <div class="w-full flex flex-col mt-3">
+            <p
+              [ngClass]="
+                showInvalidStartStateError
+                  ? 'text-red-600'
+                  : 'text-transparent no-select'
+              "
+            >
+              {{ invalidStartStateError }}
+            </p>
+            <p
+              [ngClass]="
+                showInvalidStartStateLengthError
+                  ? 'text-red-600'
+                  : 'text-transparent no-select'
+              "
+            >
+              {{ invalidStartStateLengthError }}
+            </p>
             <label for="startState">Initial State:</label>
             <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              class="w-2/3 border border-1 outline outline-1 px-2 py-1"
               type="text"
               formControlName="startState"
               placeholder="q0"
               id="startState"
               name="startState"
+              [ngClass]="
+                showInvalidStartStateError || showInvalidStartStateLengthError
+                  ? 'border-red-600 outline-red-600'
+                  : 'border-black outline-black'
+              "
             />
           </div>
           <div class="w-full flex flex-col mt-3">
+            <p
+              [ngClass]="
+                showInvalidAcceptStateError
+                  ? 'text-red-600'
+                  : 'text-transparent no-select'
+              "
+            >
+              {{ invalidAcceptStateError }}
+            </p>
             <label for="finalStates">Final States:</label>
             <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              class="w-2/3 border border-1 outline outline-1 px-2 py-1"
               id="finalStates"
               name="finalStates"
               type="text"
               formControlName="acceptStates"
               placeholder="q1,q2..."
+              [ngClass]="
+                showInvalidAcceptStateError
+                  ? 'border-red-600 outline-red-600'
+                  : 'border-black outline-black'
+              "
             />
           </div>
           <div class="w-full flex flex-col mt-3">
             <button
+              [disabled]="finiteAutomatonFeatures.invalid"
+              class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14 disabled:bg-amber-300 disabled:cursor-not-allowed"
               type="submit"
-              class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14"
+              (click)="submitValues()"
             >
               Convert NFA to other automaton
             </button>
           </div>
         </div>
         <div>
-          <div class="flex flex-col justify-start items-start">
+          <div class="flex flex-col justify-start items-start mt-3">
             <label for="transitions">Transitions</label>
+            <p
+              class="no-select"
+              [ngClass]="
+                showInvalidEpsilonError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidEpsilonError }}
+            </p>
+            <p
+              class="no-select"
+              [ngClass]="
+                showInvalidAlphabetError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidAlphabetError }}
+            </p>
+            <p
+              class="no-select"
+              [ngClass]="
+                showInvalidStateError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidStateError }}
+            </p>
             <textarea
-              class="w-96 h-80 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              class="w-96 h-80 border border-1 outline outline-1 px-2 py-1"
               formControlName="transitions"
               id="'transitions"
               name="transitions"
               placeholder="(q0,a)->q1&#10;(q1,b)->q2"
+              [ngClass]="
+                showInvalidAlphabetError ||
+                showInvalidStateError ||
+                showInvalidEpsilonError
+                  ? 'border-red-600 outline-red-600'
+                  : 'border-black outline-black'
+              "
             ></textarea>
           </div>
         </div>
       </form>
 
       <div class="w-full flex flex-col justify-start items-center mt-10">
-        <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
-        <div>
-          <img
-            height="100px"
-            width="500px"
-            src="assets/img/nfa.svg"
-            alt="DFA"
-          />
-        </div>
-        <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
-        <p class="text-lg">(ab+ba)*</p>
+        <ng-container *ngIf="equivalent_eNFA_image">
+          <h3 class="text-xl self-start ml-32">Input epsilon-NFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalent_eNFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentNFA_image">
+          <h3 class="text-xl self-start ml-32">Equivalent NFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentNFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentDFA_image">
+          <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentDFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentRegexp">
+          <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
+          <p class="text-lg">{{ equivalentRegexp }}</p>
+        </ng-container>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="automaton.DFA">
@@ -271,7 +377,7 @@
         class="flex justify-evenly items-start mt-3 w-full mx-5"
         [formGroup]="finiteAutomatonFeatures"
       >
-        <div class="flex flex-col justify-evenly items-start min-w-[45rem]">
+        <div class="flex flex-col justify-start items-start min-w-[45rem]">
           <div class="w-full flex flex-col mt-3">
             <label for="alphabets">Alphabets:</label>
             <input
@@ -295,62 +401,136 @@
             />
           </div>
           <div class="w-full flex flex-col mt-3">
+            <p
+              [ngClass]="
+                showInvalidStartStateError
+                  ? 'text-red-600'
+                  : 'text-transparent no-select'
+              "
+            >
+              {{ invalidStartStateError }}
+            </p>
+            <p
+              [ngClass]="
+                showInvalidStartStateLengthError
+                  ? 'text-red-600'
+                  : 'text-transparent no-select'
+              "
+            >
+              {{ invalidStartStateLengthError }}
+            </p>
             <label for="startState">Initial State:</label>
             <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              class="w-2/3 border border-1 outline outline-1 px-2 py-1"
               type="text"
               formControlName="startState"
               placeholder="q0"
               id="startState"
               name="startState"
+              [ngClass]="
+                showInvalidStartStateError || showInvalidStartStateLengthError
+                  ? 'border-red-600 outline-red-600'
+                  : 'border-black outline-black'
+              "
             />
           </div>
           <div class="w-full flex flex-col mt-3">
+            <p
+              [ngClass]="
+                showInvalidAcceptStateError
+                  ? 'text-red-600'
+                  : 'text-transparent no-select'
+              "
+            >
+              {{ invalidAcceptStateError }}
+            </p>
             <label for="finalStates">Final States:</label>
             <input
-              class="w-2/3 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              class="w-2/3 border border-1 outline outline-1 px-2 py-1"
               id="finalStates"
               name="finalStates"
               type="text"
               formControlName="acceptStates"
               placeholder="q1,q2..."
+              [ngClass]="
+                showInvalidAcceptStateError
+                  ? 'border-red-600 outline-red-600'
+                  : 'border-black outline-black'
+              "
             />
           </div>
           <div class="w-full flex flex-col mt-3">
             <button
+              [disabled]="finiteAutomatonFeatures.invalid"
+              class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14 disabled:bg-amber-300 disabled:cursor-not-allowed"
               type="submit"
-              class="px-2 py-3 bg-amber-500 rounded-lg border border-1 border-gray-700 w-2/3 mt-14"
+              (click)="submitValues()"
             >
               Convert NFA to other automaton
             </button>
           </div>
         </div>
         <div>
-          <div class="flex flex-col justify-start items-start">
+          <div class="flex flex-col justify-start items-start mt-3">
             <label for="transitions">Transitions</label>
+            <p
+              class="no-select"
+              [ngClass]="
+                showInvalidEpsilonError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidEpsilonError }}
+            </p>
+            <p
+              class="no-select"
+              [ngClass]="
+                showInvalidAlphabetError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidAlphabetError }}
+            </p>
+            <p
+              class="no-select"
+              [ngClass]="
+                showInvalidStateError ? 'text-red-600' : 'text-transparent'
+              "
+            >
+              {{ invalidStateError }}
+            </p>
             <textarea
-              class="w-96 h-80 border border-1 border-black outline outline-1 outline-black px-2 py-1"
+              class="w-96 h-80 border border-1 outline outline-1 px-2 py-1"
               formControlName="transitions"
               id="'transitions"
               name="transitions"
               placeholder="(q0,a)->q1&#10;(q1,b)->q2"
+              [ngClass]="
+                showInvalidAlphabetError ||
+                showInvalidStateError ||
+                showInvalidEpsilonError
+                  ? 'border-red-600 outline-red-600'
+                  : 'border-black outline-black'
+              "
             ></textarea>
           </div>
         </div>
       </form>
 
       <div class="w-full flex flex-col justify-start items-center mt-10">
-        <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
-        <div>
-          <img
-            height="100px"
-            width="500px"
-            src="assets/img/nfa.svg"
-            alt="DFA"
-          />
-        </div>
-        <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
-        <p class="text-lg">(ab+ba)*</p>
+        <ng-container *ngIf="equivalentDFA_image">
+          <h3 class="text-xl self-start ml-32">Input DFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentDFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentRegexp">
+          <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
+          <p class="text-lg">{{ equivalentRegexp }}</p>
+        </ng-container>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="automaton.REGEXP">

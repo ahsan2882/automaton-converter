@@ -46,6 +46,8 @@ class DFA:
         for transition in self.transitions:
             (state, symbol, next_state) = get_transition_state_symbol(transition)
             key = (state, next_state)
+            print(key)
+            print(transitions)
             if key not in transitions:
                 transitions[key] = symbol
             else:
@@ -54,7 +56,8 @@ class DFA:
         return {'states': self.states, 'alphabets': self.alphabet, 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
 
     def create_graph(self, name: str) -> str:
-        dfa_json: Dict[str, Union[str, List[str]]] = self.convert_to_JSON()
+        dfa_json: Dict[str, Union[str, List[str],
+                                  Tuple[str, str], str]] = self.convert_to_JSON()
         dfa_dot = Digraph(name.upper(), filename=f'{name}.gv', engine='dot')
         dfa_dot.attr('node', shape='doublecircle')
         for state in dfa_json['accept_states']:

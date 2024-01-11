@@ -150,26 +150,27 @@ dfa_from_enfa.create_graph('dfa1')
 # input_string = 'abababababbb'
 # print(dfa2_from_eNFA.check_string_input(input_string))
 
-# dfa = DFA(
-#     states=['Q0', 'Q1', 'Q2', 'Q3'],
-#     accept_states=['Q1', 'Q3'],
-#     alphabet=['a', 'b', 'c'],
-#     transitions={
-#         frozenset({'Q0', 'a'}): 'Q0',
-#         frozenset({'Q0', 'b'}): 'Q0',
-#         frozenset({'Q0', 'c'}): 'Q1',
-#         frozenset({'Q1', 'a'}): 'Q2',
-#         frozenset({'Q1', 'b'}): 'Q2',
-#         frozenset({'Q1', 'c'}): 'Q0',
-#         frozenset({'Q2', 'a'}): 'Q3',
-#         frozenset({'Q2', 'b'}): 'Q2',
-#         frozenset({'Q2', 'c'}): 'Q3',
-#         frozenset({'Q3', 'a'}): 'Q0',
-#         frozenset({'Q3', 'b'}): 'Q2',
-#         frozenset({'Q3', 'c'}): 'Q1',
-#     },
-#     start_state='Q0'
-# )
+dfa = DFA(
+    states=['Q0', 'Q1', 'Q2', 'Q3'],
+    accept_states=['Q1', 'Q3'],
+    alphabet=['a', 'b', 'c'],
+    transitions={
+        frozenset({'Q0', 'a'}): 'Q0',
+        frozenset({'Q0', 'b'}): 'Q0',
+        frozenset({'Q0', 'c'}): 'Q1',
+        frozenset({'Q1', 'a'}): 'Q2',
+        frozenset({'Q1', 'b'}): 'Q2',
+        frozenset({'Q1', 'c'}): 'Q0',
+        frozenset({'Q2', 'a'}): 'Q3',
+        frozenset({'Q2', 'b'}): 'Q2',
+        frozenset({'Q2', 'c'}): 'Q3',
+        frozenset({'Q3', 'a'}): 'Q0',
+        frozenset({'Q3', 'b'}): 'Q2',
+        frozenset({'Q3', 'c'}): 'Q1',
+    },
+    start_state='Q0'
+)
+dfa.create_graph('dfa9')
 # breakpoint()
 # regexpression = dfa.convert_to_regular_expression()
 # print(regexpression)
