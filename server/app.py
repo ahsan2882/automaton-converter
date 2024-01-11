@@ -33,8 +33,13 @@ def input_nfa():
     dfa: DFA = nfa.convert_to_dfa()
     states_map = {str(tuple(k)): v for k, v in dfa.states_map.items()}
     transitions = {str(tuple(k)): v for k, v in dfa.transitions.items()}
-    with open("nfa.svg", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
+    try:
+        with open("nfa.svg", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+    except FileNotFoundError:
+        return jsonify({"error": "Image file not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     my_dict = {
         "states": dfa.states,
         "state_maps": states_map,
