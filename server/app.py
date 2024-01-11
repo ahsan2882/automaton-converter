@@ -15,40 +15,56 @@ def input_nfa():
     payload = request.get_json()
     transitions_payload = payload['transitions']
     transitions = {}
-
+    input_is_eNFA = False
     for transition in transitions_payload:
         key = frozenset({transition['state'], transition['symbol']})
+        if transition['symbol'] == 'ε':
+            input_is_eNFA = True
         if key in transitions:
             transitions[key].append(transition['next_state'])
         else:
             transitions[key] = [transition['next_state']]
-    nfa = NFA(
-        states=payload['states'],
-        alphabet=payload['alphabets'],
-        transitions=transitions,
-        start_state=payload['startState'],
-        accept_states=payload['acceptStates'],
-    )
+    if input_is_eNFA:
+        epsilon_NFA = eNFA(
+            states=payload['states'],
+            alphabet=payload['alphabets'],
+            transitions=transitions,
+            start_state=payload['startState'],
+            accept_states=payload['acceptStates'],
+        )
+        epsilon_path = epsilon_NFA.create_graph('enfa1')
+        nfa = epsilon_NFA.convert_to_nfa()
+        with open(epsilon_path, "rb") as image_file:
+            enfa_img = base64.b64encode(image_file.read()).decode()
+    else:
+        nfa = NFA(
+            states=payload['states'],
+            alphabet=payload['alphabets'],
+            transitions=transitions,
+            start_state=payload['startState'],
+            accept_states=payload['acceptStates'],
+        )
+    nfa_path = nfa.create_graph('nfa')
 
     dfa: DFA = nfa.convert_to_dfa()
-    states_map = {str(tuple(k)): v for k, v in dfa.states_map.items()}
-    transitions = {str(tuple(k)): v for k, v in dfa.transitions.items()}
+    dfa_path = dfa.create_graph('equivalentDFA')
     try:
-        with open("nfa.svg", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode()
+
+        with open(nfa_path, "rb") as image_file:
+            nfa_img = base64.b64encode(image_file.read()).decode()
+        with open(dfa_path, "rb") as image_file:
+            dfa_img = base64.b64encode(image_file.read()).decode()
+
     except FileNotFoundError:
         return jsonify({"error": "Image file not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    my_dict = {
-        "states": dfa.states,
-        "state_maps": states_map,
-        "transitions": transitions,
-        "start_state": dfa.start_state,
-        "accept_states": dfa.accept_states,
-        "drawing": encoded_string
-    }
-    return jsonify(my_dict)
+    regexp = dfa.convert_to_regular_expression()
+    response = {'result_dfa': dfa_img,
+                'result_regexp': regexp, 'result_nfa': nfa_img}
+    if input_is_eNFA:
+        response['result_enfa'] = enfa_img
+    return jsonify(response)
 
 
 @app.route('/api/input_dfa', methods=['POST'])

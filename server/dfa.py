@@ -53,7 +53,7 @@ class DFA:
 
         return {'states': self.states, 'alphabets': self.alphabet, 'start_state': self.start_state, 'accept_states': self.accept_states, 'transitions': transitions}
 
-    def create_graph(self, name: str):
+    def create_graph(self, name: str) -> str:
         dfa_json: Dict[str, Union[str, List[str]]] = self.convert_to_JSON()
         dfa_dot = Digraph(name.upper(), filename=f'{name}.gv', engine='dot')
         dfa_dot.attr('node', shape='doublecircle')
@@ -69,6 +69,8 @@ class DFA:
             dfa_dot.edge(state, next_state, label=symbols)
 
         dfa_dot.render(name, format='svg', cleanup=True)
+        path = f'{name}.svg'
+        return path
 
     def __reduce_equation_for_state(self, terms: List[str], state_match: str) -> str:
         grouped_expression = ''
@@ -84,11 +86,11 @@ class DFA:
                     if len(grouped_expression) == 0:
                         grouped_expression = term.replace(f'({state})', '')
                     else:
-                        closure = re.findall(r'\(.+&.+\)', grouped_expression)
+                        closure = re.findall(r'\(.+\+.+\)', grouped_expression)
                         if closure and len(closure) > 0:
-                            grouped_expression += f"&&{term.replace(f'({state})', '')}"
+                            grouped_expression += f"+{term.replace(f'({state})', '')}"
                         else:
-                            grouped_expression += f"&{term.replace(f'({state})', '')}"
+                            grouped_expression += f"+{term.replace(f'({state})', '')}"
                     # grouped_expression = term.replace(f'({state})', '') if len(
                     #     grouped_expression) == 0 else grouped_expression + f"&{term.replace(f'({state})', '')}"
             else:
@@ -162,7 +164,7 @@ class DFA:
             substring = expression[start+1:end]
             char_test = expression[end+1:end+2]
             if '||' not in substring:
-                if '&' in substring:
+                if '+' in substring:
                     symb_index = f"S{len(symbol_expr)}"
                     expression = expression.replace(
                         f"({substring})", f"[{symb_index}]")
@@ -177,7 +179,7 @@ class DFA:
                             expression = expression[:start] + \
                                 substring + expression[end + 1:]
                     else:
-                        if substring not in closures.values() and ('&' in substring or '*' in substring):
+                        if substring not in closures.values() and ('+' in substring or '*' in substring):
                             index = f'C{len(closures)}'
                             expression = expression.replace(
                                 f"({substring})", f"[{index}]")

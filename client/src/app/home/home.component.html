@@ -151,17 +151,32 @@
       </form>
 
       <div class="w-full flex flex-col justify-start items-center mt-10">
-        <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
-        <div>
-          <img
-            height="100px"
-            width="500px"
-            [src]="equivalentDFA_image"
-            alt="DFA"
-          />
-        </div>
-        <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
-        <p class="text-lg">{{ equivalentRegexp }}</p>
+        <ng-container *ngIf="equivalentNFA_image">
+          <h3 class="text-xl self-start ml-32">Input NFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentNFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentDFA_image">
+          <h3 class="text-xl self-start ml-32">Equivalent DFA</h3>
+          <div>
+            <img
+              height="100px"
+              width="500px"
+              [src]="equivalentDFA_image"
+              alt="DFA"
+            />
+          </div>
+        </ng-container>
+        <ng-container *ngIf="equivalentRegexp">
+          <h3 class="text-xl self-start ml-32">Equivalent Regexp</h3>
+          <p class="text-lg">{{ equivalentRegexp }}</p>
+        </ng-container>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="automaton.E_NFA">

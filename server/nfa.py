@@ -67,6 +67,7 @@ class NFA:
             nfa_dot.edge(state, next_state, label=symbols)
 
         nfa_dot.render(name, format='svg', cleanup=True)
+        return f'{name}.svg'
 
     def convert_to_dfa(self):
         from dfa import DFA
@@ -175,6 +176,7 @@ class eNFA:
             nfa_dot.edge(state, next_state, label=symbols)
 
         nfa_dot.render(name, format='svg', cleanup=True)
+        return f'{name}.svg'
 
     def convert_to_nfa(self) -> NFA:
         new_transitions: Dict[FrozenSet[str], List] = {}
