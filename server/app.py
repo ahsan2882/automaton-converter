@@ -14,7 +14,13 @@ def render_home():
     return render_template("index.html")
 
 
-@app.route('/input_type', methods=['POST'])
+@app.route('/api/input_nfa', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def input_nfa():
+    return 'success'
+
+
+@app.route('/api/input_type', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def input_type():
     selected_item = request.form['selection']
@@ -28,7 +34,7 @@ def input_type():
         return render_template('regexp-input.html')
 
 
-@app.route('/nfa_to_dfa', methods=['GET'])
+@app.route('/api/nfa_to_dfa', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def get_nfa():
     nfa = NFA(
