@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 from nfa import NFA, eNFA
 from regexpressions import RegExpression
+import base64
 
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -32,12 +33,20 @@ def input_nfa():
     dfa: DFA = nfa.convert_to_dfa()
     states_map = {str(tuple(k)): v for k, v in dfa.states_map.items()}
     transitions = {str(tuple(k)): v for k, v in dfa.transitions.items()}
+    try:
+        with open("nfa.svg", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+    except FileNotFoundError:
+        return jsonify({"error": "Image file not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     my_dict = {
         "states": dfa.states,
         "state_maps": states_map,
         "transitions": transitions,
         "start_state": dfa.start_state,
-        "accept_states": dfa.accept_states
+        "accept_states": dfa.accept_states,
+        "drawing": encoded_string
     }
     return jsonify(my_dict)
 
